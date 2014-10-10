@@ -20,7 +20,7 @@ if (process.argv.length > 2) {
                 if (err) {
                     throw err;
                 }
-                console.dir(mazeSolver(data));
+                console.dir(mazeSolver.solve(data));
             });
         }
     });
