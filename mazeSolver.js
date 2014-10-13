@@ -120,40 +120,105 @@ var mazeSolver = module.exports = function() {
 
             var history = [];
             var map = getMap(data);
-            var preferredMoveAvailable;
+            var alternativesAvailable = [];
+            var traveledHistory = {};
 
-            function sortByMostpreferredMoves(moveA, moveB) {
-                var moveApreferred = !historyContainsPoint(history, moveA);
-                var moveBpreferred = !historyContainsPoint(history, moveB);
+            function sortByMostPreferredMoves(moveA, moveB) {
 
-                if (!preferredMoveAvailable && (moveApreferred || moveBpreferred)) {
-                    preferredMoveAvailable = true;
+                var traveled = traveledHistory[moveA.x + ',' + moveA.y];
+                var traveled2 = traveledHistory[moveB.x + ',' + moveB.y];
+
+                if (!traveled) {
+                    traveled = 0;
                 }
-                return moveApreferred === moveBpreferred ? 0 : moveApreferred ? -1 : 1;
+
+                if (!traveled2) {
+                    traveled2 = 0;
+                }
+
+                if (moveA.x == 8)
+                {
+                    debugger;
+                }
+
+                return traveled - traveled2;
+
+                //return moveA.traveled - moveB.traveled;
+                //moveA.preferred = historyContainsPoint(alternativesAvailable, moveA) || !historyContainsPoint(history, moveA);
+                //moveB.preferred = historyContainsPoint(alternativesAvailable, moveB) || !historyContainsPoint(history, moveB);
+
+                //return moveA.preferred === moveB.preferred ? 0 : moveA.preferred ? -1 : 1;
             }
 
             do {
                 var currentPoint = map.startPoint;
                 var currentPath = [];
-                preferredMoveAvailable = false;
 
                 do {
 
+                    //move to bottom?
+
                     if (map.maze[currentPoint.y][currentPoint.x] !== legend.endPoint) {
                         currentPath.push(currentPoint);
-                        history.push(currentPoint);
+
+                        if (!historyContainsPoint(currentPoint)) {
+                            history.push(currentPoint);
+                            var traveled = traveledHistory[currentPoint.x + ',' + currentPoint.y];
+                            traveledHistory[currentPoint.x + ',' + currentPoint.y] = traveled ? ++traveled : 1;
+                        }
+
+                        //console.dir(currentPath);
 
                         var availableMoves = findAvailableMoves(map.maze, currentPath, currentPoint);
 
+
+                        var indexOfAlternative;
+                        var point;
+
                         if (availableMoves.length > 0) {
-                            availableMoves.sort(sortByMostpreferredMoves);
+
+                            //  console.log('availables: ');
+                            //console.dir(availableMoves);
+
+                            availableMoves.sort(sortByMostPreferredMoves);
                             currentPoint = availableMoves[0];
+
+                            console.dir(traveledHistory);
+                            console.dir(availableMoves);
+
+                            //console.log('alts:');
+                            //console.dir(alternativesAvailable);
+
+                            indexOfAlternative = alternativesAvailable.indexOf(currentPoint);
+                            //console.log("trying to find ", currentPoint.x, currentPoint.y);
+                            //console.dir(alternativesAvailable);
+
+                            this.printProgress(map.maze, currentPath);
+
+                            //dont make functions in a loop
+                            //alternativesAvailable = alternativesAvailable.filter(function(element)
+                            //{
+                            //return element.x !== currentPoint.x && element.y !== currentPoint.y;
+                            //});
+
+                            for (var i = 1; i < availableMoves.length; i++) {
+                                point = availableMoves[i];
+
+                                if (!historyContainsPoint(history, point)) {
+                                    alternativesAvailable.push(point);
+                                }
+                            }
+
+                            //console.dir(availableMoves);
+
                         } else {
+                            //this.printProgress(map.maze, currentPath);
                             break;
                         }
 
-                        this.printProgress(map.maze, currentPath);
-                        console.log(currentPoint);
+                        //this.printProgress(map.maze, currentPath);
+                        //console.log(currentPoint);
+
                     } else {
 
                         this.printProgress(map.maze, currentPath);
@@ -164,10 +229,11 @@ var mazeSolver = module.exports = function() {
 
                     }
 
-                } while (true);
+                }
+                while (true);
 
             }
-            while (preferredMoveAvailable);
+            while (alternativesAvailable.length > 0);
 
             throw Error('No solution available!');
         },
