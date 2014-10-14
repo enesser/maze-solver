@@ -1,8 +1,9 @@
-'use strict';
-
 /**
  * Maze solver - solves a two-dimensional maze using brute force
  */
+
+'use strict';
+
 module.exports = function() {
 
     var legend = {
@@ -13,6 +14,7 @@ module.exports = function() {
         traveledPath: '*'
     };
 
+    //get map statistics from data including the physical map, start point, end point, and size
     function getMap(data) {
 
         var line;
@@ -22,12 +24,12 @@ module.exports = function() {
 
         for (var y = 0; y < lines.length; y++) {
 
-            lines[y] = line = lines[y].replace(new RegExp('[^' + '\\' + legend.wall + '\\' + legend.path + '\\' + legend.startPoint + '\\' + legend.endPoint + ']'), '');
-
+            //ignore characters that aren't whitespace or in the legend
+            lines[y] = line = lines[y].replace(new RegExp('[^' + '\\' + legend.wall + '\\' + legend.path + '\\' + legend.startPoint + '\\' + legend.endPoint + '\\s]'), '');
             totalSize += line.length;
 
+            //discover the start and end points
             for (var x = 0; x < line.length; x++) {
-
                 if (line[x] === legend.startPoint) {
                     map.startPoint = {
                         x: x,
@@ -42,6 +44,7 @@ module.exports = function() {
             }
         }
 
+        //map stats
         map.maze = lines;
         map.totalSize = totalSize;
 
@@ -64,6 +67,7 @@ module.exports = function() {
         history[xy] = point;
     }
 
+    //find available moves from the current point, exclude points we've visited this iteration
     function findAvailableMoves(maze, excludePoints, currentPoint) {
         var availableMoves = [];
         var trialMoves = [];
@@ -112,7 +116,20 @@ module.exports = function() {
 
     return {
 
+        /**
+         * Maze legend
+         * @type {object}
+         */
         legend: legend,
+
+        /**
+         * Set a new legend
+         * @param {object} legend
+         */
+        setLegend: function(legend)
+        {
+            this.legend = legend;
+        }
 
         /**
          * Provide solution for two-dimensional maze using brute force
@@ -127,6 +144,7 @@ module.exports = function() {
             var currentTravels = 0;
             var startTime = new Date();
 
+            //sort by preferred moves (preferred moves include the least visited points)
             function sortByMostPreferredMoves(moveA, moveB) {
                 var pointA = getPointFromHistory(history, moveA);
                 var pointB = getPointFromHistory(history, moveB);
@@ -134,14 +152,16 @@ module.exports = function() {
             }
 
             do {
+                //represents an attempt iteration
                 var currentPoint = map.startPoint;
                 var currentPath = [];
 
                 do {
-
+                    //keep going until we run out of available moves in this iteration
                     if (map.maze[currentPoint.y][currentPoint.x] !== legend.endPoint) {
                         setPointInHistory(currentPath, currentPoint);
 
+                        //keep track of our history so we know to evade points that we've visited before
                         var point = getPointFromHistory(history, currentPoint);
 
                         if (!point) {
@@ -150,17 +170,15 @@ module.exports = function() {
                             currentTravels = ++point.traveled;
                         }
 
+                        //find an available move to make from the current point
                         availableMoves = findAvailableMoves(map.maze, currentPath, currentPoint);
 
                         if (availableMoves.length > 0) {
                             availableMoves.sort(sortByMostPreferredMoves);
                             currentPoint = availableMoves[0];
                         }
-
-                        //var mazeSolutionFormatter = require('./mazeSolutionFormatter');
-                        //mazeSolutionFormatter.printSolution('test', { maze: map.maze, solutionElapsedTime: 0, solutionPath: currentPath });
-
                     } else {
+                        //return the solution
                         return {
                             maze: map.maze,
                             size: map.size,
