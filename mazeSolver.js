@@ -2,10 +2,8 @@
 
 /**
  * Maze solver - solves a two-dimensional maze using brute force
- * @param  {[string]} map file data
- * @return {[object]} solution with symbol denoting the success path
  */
-var mazeSolver = module.exports = function() {
+module.exports = function() {
 
     var legend = {
         wall: '#',
@@ -49,23 +47,24 @@ var mazeSolver = module.exports = function() {
         throw 'Maze must have a start point (' + legend.startPoint + ') and end point (' + legend.endPoint + ')';
     }
 
-    function historyContainsPoint(history, point) {
-        var historyPoint;
+    //get point from history array
+    function getPointFromHistory(history, point) {
+        var xy = point.x + ", " + point.y;
+        return history[xy];
+    }
 
-        for (var i = 0; i < history.length; i++) {
-            historyPoint = history[i];
-
-            if (historyPoint.x === point.x && historyPoint.y === point.y) {
-                return true;
-            }
-        }
-        return false;
+    //set point in history array
+    function setPointInHistory(history, point) {
+        var xy = point.x + ", " + point.y;
+        point.traveled = 1;
+        history[xy] = point;
     }
 
     function findAvailableMoves(maze, excludePoints, currentPoint) {
         var availableMoves = [];
         var trialMoves = [];
         var move;
+        var historyPoint;
 
         //try up
         trialMoves.push({
@@ -96,14 +95,14 @@ var mazeSolver = module.exports = function() {
             move = trialMoves[i];
 
             if (maze[move.y] && maze[move.y][move.x]) {
-                if (!historyContainsPoint(excludePoints, move)) {
+                historyPoint = getPointFromHistory(excludePoints, move);
+                if (!historyPoint) {
                     if (maze[move.y][move.x] === legend.path || maze[move.y][move.x] === legend.endPoint) {
                         availableMoves.push(move);
                     }
                 }
             }
         }
-
         return availableMoves;
     }
 
@@ -116,38 +115,20 @@ var mazeSolver = module.exports = function() {
          * @param  {[string]} map file
          * @return {[object]} solution with symbol denoting the success path
          */
-        solve: function(data) {
+        getSolution: function(data) {
 
-            var history = [];
             var map = getMap(data);
+            var history = [];
             var alternativesAvailable = [];
-            var traveledHistory = {};
+            var availableMoves;
+            var startTime = new Date();
 
             function sortByMostPreferredMoves(moveA, moveB) {
 
-                var traveled = traveledHistory[moveA.x + ',' + moveA.y];
-                var traveled2 = traveledHistory[moveB.x + ',' + moveB.y];
+                var pointA = getPointFromHistory(history, moveA);
+                var pointB = getPointFromHistory(history, moveB);
 
-                if (!traveled) {
-                    traveled = 0;
-                }
-
-                if (!traveled2) {
-                    traveled2 = 0;
-                }
-
-                if (moveA.x == 8)
-                {
-                    debugger;
-                }
-
-                return traveled - traveled2;
-
-                //return moveA.traveled - moveB.traveled;
-                //moveA.preferred = historyContainsPoint(alternativesAvailable, moveA) || !historyContainsPoint(history, moveA);
-                //moveB.preferred = historyContainsPoint(alternativesAvailable, moveB) || !historyContainsPoint(history, moveB);
-
-                //return moveA.preferred === moveB.preferred ? 0 : moveA.preferred ? -1 : 1;
+                return (pointA ? pointA.traveled : 0) - (pointB ? pointB.traveled : 0);
             }
 
             do {
@@ -156,85 +137,37 @@ var mazeSolver = module.exports = function() {
 
                 do {
 
-                    //move to bottom?
-
                     if (map.maze[currentPoint.y][currentPoint.x] !== legend.endPoint) {
-                        currentPath.push(currentPoint);
+                        setPointInHistory(currentPath, currentPoint);
 
-                        if (!historyContainsPoint(currentPoint)) {
-                            history.push(currentPoint);
-                            var traveled = traveledHistory[currentPoint.x + ',' + currentPoint.y];
-                            traveledHistory[currentPoint.x + ',' + currentPoint.y] = traveled ? ++traveled : 1;
+                        var point = getPointFromHistory(history, currentPoint);
+
+                        if (!point) {
+                            setPointInHistory(history, currentPoint);
+                        } else {
+                            ++point.traveled;
                         }
 
-                        //console.dir(currentPath);
-
-                        var availableMoves = findAvailableMoves(map.maze, currentPath, currentPoint);
-
-
-                        var indexOfAlternative;
-                        var point;
+                        availableMoves = findAvailableMoves(map.maze, currentPath, currentPoint);
 
                         if (availableMoves.length > 0) {
-
-                            //  console.log('availables: ');
-                            //console.dir(availableMoves);
-
                             availableMoves.sort(sortByMostPreferredMoves);
                             currentPoint = availableMoves[0];
-
-                            console.dir(traveledHistory);
-                            console.dir(availableMoves);
-
-                            //console.log('alts:');
-                            //console.dir(alternativesAvailable);
-
-                            indexOfAlternative = alternativesAvailable.indexOf(currentPoint);
-                            //console.log("trying to find ", currentPoint.x, currentPoint.y);
-                            //console.dir(alternativesAvailable);
-
-                            this.printProgress(map.maze, currentPath);
-
-                            //dont make functions in a loop
-                            //alternativesAvailable = alternativesAvailable.filter(function(element)
-                            //{
-                            //return element.x !== currentPoint.x && element.y !== currentPoint.y;
-                            //});
-
-                            for (var i = 1; i < availableMoves.length; i++) {
-                                point = availableMoves[i];
-
-                                if (!historyContainsPoint(history, point)) {
-                                    alternativesAvailable.push(point);
-                                }
-                            }
-
-                            //console.dir(availableMoves);
-
-                        } else {
-                            //this.printProgress(map.maze, currentPath);
-                            break;
                         }
-
-                        //this.printProgress(map.maze, currentPath);
-                        //console.log(currentPoint);
-
                     } else {
-
                         this.printProgress(map.maze, currentPath);
                         return {
                             maze: map.maze,
+                            elapsedTime: new Date() - startTime,
                             solutionPath: currentPath
                         };
-
                     }
-
                 }
-                while (true);
-
+                while (availableMoves && availableMoves.length > 0);
             }
-            while (alternativesAvailable.length > 0);
+            while (true);
 
+            //no solution is available to get to the end point, error out
             throw Error('No solution available!');
         },
 
@@ -244,7 +177,7 @@ var mazeSolver = module.exports = function() {
 
                 for (var j = 0; j < maze[i].length; j++) {
 
-                    if (historyContainsPoint(currentPath, {
+                    if (getPointFromHistory(currentPath, {
                         x: j,
                         y: i
                     })) {
