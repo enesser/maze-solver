@@ -129,7 +129,7 @@ module.exports = function() {
         setLegend: function(legend)
         {
             this.legend = legend;
-        }
+        },
 
         /**
          * Provide solution for two-dimensional maze using brute force
