@@ -18,10 +18,13 @@ module.exports = function() {
         var line;
         var lines = data.split('\n');
         var map = {};
+        var totalSize = 0;
 
         for (var y = 0; y < lines.length; y++) {
 
             lines[y] = line = lines[y].replace(new RegExp('[^' + '\\' + legend.wall + '\\' + legend.path + '\\' + legend.startPoint + '\\' + legend.endPoint + ']'), '');
+
+            totalSize += line.length;
 
             for (var x = 0; x < line.length; x++) {
 
@@ -40,6 +43,7 @@ module.exports = function() {
         }
 
         map.maze = lines;
+        map.totalSize = totalSize;
 
         if (map.startPoint && map.endPoint) {
             return map;
@@ -49,13 +53,13 @@ module.exports = function() {
 
     //get point from history array
     function getPointFromHistory(history, point) {
-        var xy = point.x + ", " + point.y;
+        var xy = point.x + ',' + point.y;
         return history[xy];
     }
 
     //set point in history array
     function setPointInHistory(history, point) {
-        var xy = point.x + ", " + point.y;
+        var xy = point.x + ',' + point.y;
         point.traveled = 1;
         history[xy] = point;
     }
@@ -119,15 +123,13 @@ module.exports = function() {
 
             var map = getMap(data);
             var history = [];
-            var alternativesAvailable = [];
             var availableMoves;
+            var currentTravels = 0;
             var startTime = new Date();
 
             function sortByMostPreferredMoves(moveA, moveB) {
-
                 var pointA = getPointFromHistory(history, moveA);
                 var pointB = getPointFromHistory(history, moveB);
-
                 return (pointA ? pointA.traveled : 0) - (pointB ? pointB.traveled : 0);
             }
 
@@ -145,7 +147,7 @@ module.exports = function() {
                         if (!point) {
                             setPointInHistory(history, currentPoint);
                         } else {
-                            ++point.traveled;
+                            currentTravels = ++point.traveled;
                         }
 
                         availableMoves = findAvailableMoves(map.maze, currentPath, currentPoint);
@@ -154,10 +156,14 @@ module.exports = function() {
                             availableMoves.sort(sortByMostPreferredMoves);
                             currentPoint = availableMoves[0];
                         }
+
+                        //var mazeSolutionFormatter = require('./mazeSolutionFormatter');
+                        //mazeSolutionFormatter.printSolution('test', { maze: map.maze, solutionElapsedTime: 0, solutionPath: currentPath });
+
                     } else {
-                        this.printProgress(map.maze, currentPath);
                         return {
                             maze: map.maze,
+                            size: map.size,
                             elapsedTime: new Date() - startTime,
                             solutionPath: currentPath
                         };
@@ -165,30 +171,10 @@ module.exports = function() {
                 }
                 while (availableMoves && availableMoves.length > 0);
             }
-            while (true);
+            while (currentTravels < map.totalSize);
 
             //no solution is available to get to the end point, error out
             throw Error('No solution available!');
-        },
-
-        printProgress: function(maze, currentPath) {
-            for (var i = 0; i < maze.length; i++) {
-                var str = '';
-
-                for (var j = 0; j < maze[i].length; j++) {
-
-                    if (getPointFromHistory(currentPath, {
-                        x: j,
-                        y: i
-                    })) {
-                        str += '*';
-                    } else {
-                        str += maze[i][j];
-                    }
-                }
-
-                console.log(str);
-            }
         }
     };
 }();

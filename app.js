@@ -1,9 +1,5 @@
 'use strict';
 
-/* globals process: true */
-/* globals require: true */
-/* globals console: true */
-
 /*
 if (process.argv.length < 3) {
   console.log('Usage: node ' + process.argv[1] + ' FILENAME');
@@ -13,6 +9,7 @@ if (process.argv.length < 3) {
 if (process.argv.length > 2) {
     var fs = require('fs');
     var mazeSolver = require('./mazeSolver');
+    var mazeSolutionFormatter = require('./mazeSolutionFormatter');
 
     process.argv.forEach(function(value, index) {
         if (index > 1) {
@@ -21,7 +18,7 @@ if (process.argv.length > 2) {
                     throw err;
                 }
 
-                console.dir(mazeSolver.getSolution(data));
+                mazeSolutionFormatter.printSolution(value, mazeSolver.getSolution(data));
 
             });
         }
