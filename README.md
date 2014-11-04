@@ -8,7 +8,7 @@ Maze puzzle solver, implemented in Node.
 I heard about a cool interview challenge where a company would ask you to 
 implement a maze solver in C# and .NET. I thought I'd try it just for fun.
 
-I did the initial version in C#, and decided to make a Node version. The Node version is much faster. It can solve the sample mazes in a millisecond or less.  
+I did the initial version in C#, and decided to make a Node version. The Node version is much faster. It can solve the sample mazes in two milliseconds or less.  
 
 This maze solver loads custom mazes stored in text files and solves them. Although this ships with a console demo, the maze solver module can be used on the web or in a GUI application. Have fun!
 
