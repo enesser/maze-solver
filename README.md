@@ -22,7 +22,7 @@ The demo app can be executed from a Bash or DOS prompt:
 
 Example:
 
-`node app maze-sample-1 maze-sample-2`
+`$ node app maze-sample-1 maze-sample-2`
 
 You can create custom text maps with whatever legend you prefer. The default legend is:
 
@@ -34,9 +34,11 @@ You can create custom text maps with whatever legend you prefer. The default leg
 ```
 
 ## How It Works
-The maze solver keeps track of where it has been in the current iteration and all iterations of trying to solve the maze. It won't double-back on any space it's been in the current iteration, and it priortizes the next step forward by the paths least traveled in all iterations.  
+The maze solver keeps track of where it has been in the current iteration and all iterations of trying to solve the maze. It won't double-back on any space it's been in the current iteration, and it priortizes the next step forward by the path least traveled across all iterations.  
 
-When the maze solver ends up traveling a path so many times that it exceeds the number of spaces in the map, it gives up and decides there is no possible route to the end point.
+When the maze solver ends up traveling a path so many times that it exceeds the number of spaces in the map, it gives up and decides there is no possible route to the end point. 
+
+If the solver finds an end point, it considers the path victorious and uses a formatter module to show the solution in color on the console. The formatter is optional and you can swap it for your own to make a GUI-based or web version.
 
 ## Contributions
 Contributions in the form of code, issues, or custom maps are always welcome!
