@@ -1,5 +1,8 @@
-﻿Maze Solver v1.0
+﻿Maze Solver
 ==========
+
+[![Dependency Status](https://david-dm.org/enesser/maze-solver.svg?style=flat)](https://david-dm.org/enesser/maze-solver.svg?style=flat)
+[![devDependency Status](https://david-dm.org/enesser/maze-solver/dev-status.svg?style=flat)](https://david-dm.org/enesser/maze-solver/dev-status.svg?style=flat)
 
 Maze puzzle solver, implemented in Node.
 
