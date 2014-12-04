@@ -154,7 +154,7 @@ module.exports = function() {
             do {
                 //represents an attempt iteration
                 var currentPoint = map.startPoint;
-                var currentPath = [];
+                var currentPath = {};
 
                 do {
                     //keep going until we run out of available moves in this iteration
