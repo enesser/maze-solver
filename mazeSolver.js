@@ -51,7 +51,7 @@ module.exports = function() {
         if (map.startPoint && map.endPoint) {
             return map;
         }
-        throw 'Maze must have a start point (' + legend.startPoint + ') and end point (' + legend.endPoint + ')';
+        throw Error('Maze must have a start point (' + legend.startPoint + ') and end point (' + legend.endPoint + ')');
     }
 
     //get point from history array
