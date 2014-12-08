@@ -1,6 +1,7 @@
 ﻿Maze Solver
 ==========
 
+[![Build Status](https://travis-ci.org/enesser/maze-solver.svg?branch=master)](https://travis-ci.org/enesser/maze-solver.svg?branch=master)
 [![Dependency Status](https://david-dm.org/enesser/maze-solver.svg?style=flat)](https://david-dm.org/enesser/maze-solver.svg?style=flat)
 [![devDependency Status](https://david-dm.org/enesser/maze-solver/dev-status.svg?style=flat)](https://david-dm.org/enesser/maze-solver/dev-status.svg?style=flat)
 
