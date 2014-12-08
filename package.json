@@ -4,10 +4,11 @@
   "description": "Maze puzzle solver, implemented in Node.",
   "main": "app.js",
   "dependencies": {
-    "chalk": "^0.5.1",
+    "chalk": "^0.5.1"
+  },
+  "devDependencies": {
     "mocha": "~2.0.1"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "mocha ./test/tests"
   },
